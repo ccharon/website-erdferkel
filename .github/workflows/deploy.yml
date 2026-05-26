@@ -40,7 +40,7 @@ jobs:
           cp index.css index.html erdferkel.svg /tmp/dist-build
           git checkout --orphan dist-new
           git rm -rf . --quiet
-          cp /tmp/dist-build/. .
+          cp -r /tmp/dist-build/. .
           git add .
           git commit -m "dist: build from $SHA"
           git push origin HEAD:dist --force
