@@ -1,13 +1,13 @@
 :root {
-    --brand:        #854f23;
-    --brand-dark:   #6b3f1c;
+    --brand:        #0c7c9e;
+    --brand-dark:   #0a6a88;
     --bg:           #ffffff;
-    --surface:      #faf9f7;
-    --border:       #e8ddd4;
+    --surface:      #f5fbfd;
+    --border:       #cce8f2;
     --text:         #1a1a1a;
     --text-muted:   #72767b;
     --shadow-sm:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
-    --shadow-md:    0 4px 16px rgba(133,79,35,.15), 0 2px 4px rgba(0,0,0,.06);
+    --shadow-md:    0 4px 16px rgba(12,124,158,.15), 0 2px 4px rgba(0,0,0,.06);
     --radius:       6px;
 }
 
