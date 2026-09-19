@@ -165,9 +165,21 @@ footer {
     border-top: 1px solid var(--border);
 }
 
+footer p { margin: 0; }
+
 footer a {
     color: var(--brand);
     text-decoration: none;
+}
+
+.build {
+    margin-top: 4px;
+    font-size: .7rem;
+    opacity: .75;
+}
+
+.build span {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /* ── Responsive tweaks ───────────────────────────────────────── */

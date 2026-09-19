@@ -32,6 +32,7 @@ jobs:
           git config user.name "GitHub Actions"
           SHA=$(git rev-parse --short HEAD)
           sed -i -E "s/(href|src)=\"(index\.css|erdferkel\.svg)\"/\\1=\"\\2?v=$SHA\"/g" index.html
+          sed -i -E "s|(<span id=\"build\">)[^<]*(</span>)|\\1$SHA\\2|" index.html
           # Twins for gzip_static and brotli_static, written once index.html is final.
           ASSETS="index.html index.css erdferkel.svg"
           node -e '
