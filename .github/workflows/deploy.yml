@@ -6,42 +6,50 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install minification tools
-        run: sudo npm install -g csso-cli html-minifier-terser
-        # run: sudo npm install -g terser csso-cli html-minifier-terser
-
-      #- name: Minify JS
-      #  run: |
-      #    terser dist/assets/codewheel.js -o dist/assets/codewheel.js -c -m
-      #    terser dist/assets/interact.js   -o dist/assets/interact.js   -c -m
+        run: |
+          npm install -g --prefix "$RUNNER_TEMP/npm" lightningcss-cli html-minifier-terser
+          echo "$RUNNER_TEMP/npm/bin" >> "$GITHUB_PATH"
 
       - name: Minify CSS
-        run: |
-          csso index.css --output index.css
+        run: lightningcss --minify index.css -o index.css.tmp && mv index.css.tmp index.css
 
       - name: Minify HTML
         run: |
           OPTS="--collapse-whitespace --remove-comments"
-          html-minifier-terser $OPTS index.html -o index.html
+          html-minifier-terser $OPTS index.html -o index.tmp && mv index.tmp index.html
 
       - name: Push to dist branch
         run: |
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
           SHA=$(git rev-parse --short HEAD)
-          mkdir -p /tmp/dist-build
-          cp index.css index.html erdferkel.svg /tmp/dist-build
+          sed -i -E "s/(href|src)=\"(index\.css|erdferkel\.svg)\"/\\1=\"\\2?v=$SHA\"/g" index.html
+          # Twins for gzip_static and brotli_static, written once index.html is final.
+          ASSETS="index.html index.css erdferkel.svg"
+          node -e '
+            const fs = require("fs"), zlib = require("zlib");
+            for (const f of process.argv.slice(1)) {
+              const raw = fs.readFileSync(f);
+              fs.writeFileSync(f + ".gz", zlib.gzipSync(raw, { level: 9 }));
+              fs.writeFileSync(f + ".br", zlib.brotliCompressSync(raw, { params: {
+                [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
+                [zlib.constants.BROTLI_PARAM_SIZE_HINT]: raw.length
+              } }));
+              console.log(f, raw.length, fs.statSync(f + ".gz").size, fs.statSync(f + ".br").size);
+            }
+          ' $ASSETS
           git checkout --orphan dist-new
-          git rm -rf . --quiet
-          cp -r /tmp/dist-build/. .
-          git add .
+          git rm -rf . --cached
+          git add $ASSETS
+          for f in $ASSETS; do git add "$f.gz" "$f.br"; done
           git commit -m "dist: build from $SHA"
           git push origin HEAD:dist --force
 
